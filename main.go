@@ -3,6 +3,10 @@ import "fmt"
 import "github.com/disintegration/imaging"
 import _ "golang.org/x/image/webp"
 import "os"
+import "strings"
+
+var sb strings.Builder
+
 func main() {
 	imageSize := 200
 	ASCIIChars := []string{
@@ -32,7 +36,7 @@ func main() {
 		larguraOriginal := img.Bounds().Dx()
 		novaAltura := float32(alturaOriginal) / float32(larguraOriginal) * float32(imageSize)
 		novaAltura *= 0.55 // Ajuste para compensar a proporção dos caracteres ASCII
-		img = imaging.Resize(img, imageSize, int(novaAltura), imaging.Lanczos)
+		img = imaging.Resize(img, imageSize, int(novaAltura), imaging.Box)
 
 		// Converter para escala de cinza
 		img = imaging.Grayscale(img) 
@@ -41,24 +45,16 @@ func main() {
 		for y:= 0; y <img.Bounds().Dy(); y ++{
 			for x:= 0; x <img.Bounds().Dx(); x ++{
 				r, g ,b, _ := img.At(x, y).RGBA()
-				media := float32((r >> 8 + g >> 8 + b >> 8) / 3)  // media dos valores RGB max de 255
+				media := float32(((r >> 8) + (g >> 8) + (b >> 8)) / 3)  // media dos valores RGB max de 255
 				ASCIIValue := int(media * float32(len(ASCIIChars)-1) / 255.0) // valores de 0 a Tamanho da lista de caracteres ASCII - 1
 				ASCIIChar := ASCIIChars[ASCIIValue]
-				fmt.Print(ASCIIChar)
+				sb.WriteString(ASCIIChar)
 
 			}
-			fmt.Println()
+			sb.WriteByte('\n')
 		}
-		fmt.Println()
-		fmt.Println()
-		fmt.Println()
-		fmt.Println()
-		fmt.Println()
-		fmt.Println()
-		fmt.Println()
-		fmt.Println()
-		fmt.Println()
-		fmt.Println()
+		fmt.Println(sb.String())
+		sb.Reset()
 	}
 	fmt.Scanln()
 }
